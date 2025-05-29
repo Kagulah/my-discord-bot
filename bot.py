@@ -1,3 +1,7 @@
+import discord
+from discord.ext import commands
+from discord import app_commands
+import sqlite3
 import os
 
 TOKEN = os.getenv("DISCORD_TOKEN")
@@ -8,11 +12,7 @@ if not TOKEN:
 # later...
 bot.run(TOKEN)
 
-import discord
-from discord.ext import commands
-from discord import app_commands
-import sqlite3
-import os
+
 
 # Constants
 GUILD_ID = 1371506090382069881
