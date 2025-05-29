@@ -1,3 +1,13 @@
+import os
+
+TOKEN = os.getenv("DISCORD_TOKEN")
+
+if not TOKEN:
+    raise RuntimeError("DISCORD_TOKEN environment variable not set!")
+
+# later...
+bot.run(TOKEN)
+
 import discord
 from discord.ext import commands
 from discord import app_commands
