@@ -7,7 +7,7 @@ import os
 # Constants
 GUILD_ID = 1371506090382069881
 REGISTRATION_CHANNEL_ID = 1377744313840173096
-TOKEN = os.getenv("MTM3Nzc1MTQwMjc1MDgwODEwNQ.GCJ7kq.3d9Ok0cklvnuc6zOxccgwMx6OFB9OOTdDbS-Q0")
+TOKEN = os.getenv("DISCORD_TOKEN")
 VERIFIED_ROLE_NAME = "🌐 Verified"
 TOURNAMENTS = ["Spring Showdown 2025"]  # Rename to your tournaments
 
