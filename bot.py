@@ -1,11 +1,8 @@
+import os
 import discord
 from discord.ext import commands
-from discord import app_commands
-import sqlite3
-import os
 
 TOKEN = os.getenv("DISCORD_TOKEN")
-
 if not TOKEN:
     raise RuntimeError("DISCORD_TOKEN environment variable not set!")
 
