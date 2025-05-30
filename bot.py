@@ -1,22 +1,22 @@
 import os
+import sqlite3
 import discord
 from discord.ext import commands
+from discord import app_commands
+from dotenv import load_dotenv
 
-TOKEN = os.getenv("DISCORD_TOKEN")
-if not TOKEN:
-    raise RuntimeError("DISCORD_TOKEN environment variable not set!")
-
-# later...
-bot.run(TOKEN)
-
-
+load_dotenv()
 
 # Constants
 GUILD_ID = 1371506090382069881
 REGISTRATION_CHANNEL_ID = 1377744313840173096
-TOKEN = os.getenv("DISCORD_TOKEN")
 VERIFIED_ROLE_NAME = "🌐 Verified"
 TOURNAMENTS = ["Spring Showdown 2025"]  # Rename to your tournaments
+
+# Get Discord Token
+TOKEN = os.getenv("DISCORD_TOKEN")
+if not TOKEN:
+    raise RuntimeError("DISCORD_TOKEN environment variable not set!")
 
 # SQLite setup
 DB_PATH = "registrations.db"
@@ -36,21 +36,30 @@ CREATE TABLE IF NOT EXISTS registrations (
 ''')
 conn.commit()
 
+# Define Modal for registration input
 class RegisterModal(discord.ui.Modal, title="Tournament Registration"):
     def __init__(self):
         super().__init__()
-        self.add_item(discord.ui.TextInput(label="Your Minecraft IGN", placeholder="Enter your username"))
-        self.add_item(discord.ui.TextInput(label="Teammate 1 (optional)", required=False))
-        self.add_item(discord.ui.TextInput(label="Teammate 2 (optional)", required=False))
-        self.add_item(discord.ui.TextInput(label="Teammate 3 (optional)", required=False))
+        self.ign = discord.ui.TextInput(label="Your Minecraft IGN", placeholder="Enter your username")
+        self.teammate1 = discord.ui.TextInput(label="Teammate 1 (optional)", required=False)
+        self.teammate2 = discord.ui.TextInput(label="Teammate 2 (optional)", required=False)
+        self.teammate3 = discord.ui.TextInput(label="Teammate 3 (optional)", required=False)
+
+        self.add_item(self.ign)
+        self.add_item(self.teammate1)
+        self.add_item(self.teammate2)
+        self.add_item(self.teammate3)
 
     async def on_submit(self, interaction: discord.Interaction):
-        ign = self.children[0].value.strip()
-        teammates = [child.value.strip() for child in self.children[1:] if child.value.strip()]
+        ign = self.ign.value.strip()
+        teammates = [t.value.strip() for t in [self.teammate1, self.teammate2, self.teammate3] if t.value.strip()]
 
         # Save registration to DB
         c.execute(
-            'INSERT INTO registrations (user_id, ign, teammate1, teammate2, teammate3) VALUES (?, ?, ?, ?, ?)',
+            '''
+            INSERT INTO registrations (user_id, ign, teammate1, teammate2, teammate3)
+            VALUES (?, ?, ?, ?, ?)
+            ''',
             (
                 interaction.user.id,
                 ign,
@@ -67,6 +76,7 @@ class RegisterModal(discord.ui.Modal, title="Tournament Registration"):
             ephemeral=True
         )
 
+# Define the View with the Register button
 class RegisterView(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)  # Persistent view, no timeout
@@ -103,7 +113,7 @@ guild = discord.Object(id=GUILD_ID)
 async def on_ready():
     print(f"Bot is ready. Logged in as {bot.user}")
 
-    # Sync commands to your guild
+    # Sync slash commands to the guild
     try:
         await bot.tree.sync(guild=guild)
         print("✅ Slash commands synced.")
@@ -119,7 +129,7 @@ async def on_ready():
         print(f"Error: Cannot find channel with ID {REGISTRATION_CHANNEL_ID}")
         return
 
-    # Try to find existing registration message by your bot with the custom_id button
+    # Check for existing registration message
     async for message in channel.history(limit=50):
         if message.author == bot.user and message.components:
             for row in message.components:
@@ -143,4 +153,5 @@ async def post_register_message(interaction: discord.Interaction):
         view=view
     )
 
+# Run the bot
 bot.run(TOKEN)
